@@ -44,3 +44,58 @@ input, select, button {
     height: 45px; /* Altura confortável para o toque */
     font-size: 16px; /* Evita que o iPhone dê zoom automático no input */
 }
+
+@media (max-width: 768px) {
+    /* 1. Faz o card do modal ocupar quase a largura toda */
+    .modal-content {
+        width: 90% !important;
+        padding: 25px 20px !important;
+        border-radius: 15px;
+    }
+
+    /* 2. Aumenta o espaçamento do título e texto */
+    .modal-content h3 {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+
+    .modal-content p {
+        margin-bottom: 20px;
+    }
+
+    /* 3. Estiliza o Select para ser um "alvo" fácil de tocar */
+    #monitorRecebedor {
+        height: 50px; /* Mais alto para o dedo */
+        font-size: 16px; /* Evita zoom automático no iPhone */
+        margin-bottom: 25px;
+    }
+
+    /* 4. EMPILHA OS BOTÕES (A mágica acontece aqui) */
+    .modal-buttons {
+        display: flex;
+        flex-direction: column; /* Transforma lado-a-lado em um-sobre-o-outro */
+        gap: 12px; /* Espaço entre os botões */
+    }
+
+    /* 5. Faz os botões ocuparem a largura total */
+    .modal-buttons button {
+        width: 100% !important;
+        height: 50px; /* Botão grande para o clique */
+        margin: 0 !important; /* Remove margens laterais antigas */
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+    /* Opcional: Colocar o botão de cancelar com uma cor mais sutil ou sem fundo */
+    .btn-cancelar {
+        background-color: transparent !important;
+        color: #666 !important;
+        border: 1px solid #ccc !important;
+        order: 2; /* Garante que o cancelar fique por último */
+    }
+    
+    .btn-confirmar {
+        order: 1; /* Garante que o confirmar fique em primeiro (no topo) */
+    }
+}
