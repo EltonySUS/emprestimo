@@ -1,0 +1,46 @@
+.container {
+    width: 95%; /* Ocupa quase a tela toda */
+    padding: 10px;
+    margin-top: 20px;
+}
+
+/* 2. Ajuste das Tabelas (O maior problema no celular) */
+/* Isso permite que a tabela deslize para o lado se for muito grande */
+.tabela-container {
+    overflow-x: auto;
+    display: block;
+    width: 100%;
+}
+
+table {
+    font-size: 14px; /* Diminui um pouco a letra */
+}
+
+.nav-title {
+    font-size: 1.1rem; /* Tamanho menor para telas de celular */
+    white-space: nowrap; /* Impede que o texto quebre em duas linhas */
+}
+
+/* 3. Ajuste dos Cards (Se você usa flexbox ou grid) */
+/* Faz com que os cards fiquem um embaixo do outro */
+.cards-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* 4. Ajuste da Imagem de Fundo (Marca d'água) */
+/* No celular, a imagem gigante pode atrapalhar a leitura */
+body::after {
+    background-size: 80vh auto; /* Diminuímos o tamanho para 50% da altura */
+    opacity: 0.4; /* Deixamos ainda mais transparente para não poluir */
+    background-position: center ; /* Talvez fique melhor no rodapé */
+}
+
+/* 5. Ajuste dos Botões e Inputs */
+/* No celular, é melhor ter botões maiores para o dedo tocar fácil */
+input, select, button {
+    width: 100%; /* Faz os campos ocuparem a largura toda */
+    height: 45px; /* Altura confortável para o toque */
+    font-size: 16px; /* Evita que o iPhone dê zoom automático no input */
+}

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Empréstimos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="mobile.css" media="screen and (max-width: 768px)">
+</head>
+<body>
+
+<div id="splash-screen">
+    <div class="splash-content">
+        <img src="img/icon2.png" alt="Logo" class="splash-logo">
+        <div class="loader"></div>
+        <p>Iniciando Sistema...</p>
+    </div>
+</div>
+
+<nav class="navbar">
+    <div class="nav-content">
+         <span class="nav-title">Sistema de Empréstimo</span>
+        <div class="nav-logo">
+            <img src="img/icon2.png" alt="Logo">
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="card">
+        <h2>Novo Empréstimo</h2>
+        <form id="formEmprestimo">
+            <div class="form-group">
+                <label>Monitor que está emprestando:</label>
+                    <select id="monitor" required>
+                        <option value="">Carregando monitores...</option>
+                    </select>
+            </div>
+            <div class="form-group">
+                <label>Tipo de Usuário:</label>
+                <select id="tipoUsuario" required>
+                    <option value="Aluno">Aluno</option>
+                    <option value="Professor">Professor</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Nome do Usuário:</label>
+                
+                <input type="text" id="nomeUsuarioInput" placeholder="Nome do Aluno">
+                
+                <select id="nomeUsuarioSelect" style="display: none;">
+                    <option value="">Carregando professores...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Item emprestado:</label>
+                <input type="text" id="objeto" placeholder="Ex: Projetor" required>
+            </div>
+            <div class="form-group">
+                <label>Data Empréstimo:</label>
+                <input type="date" id="dataEmprestimo" required>
+            </div>
+            <div class="form-group">
+                <label>Prazo de Devolução:</label>
+                <input type="date" id="prazo" required disabled>
+            </div>
+            <button type="submit">Registrar</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Empréstimo de Alunos</h2>
+        <table id="tabelaAlunos">
+            <thead><tr><th>Objeto</th><th>Aluno</th><th>Ação</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>ATRASADOS</h2>
+        <table id="tabelaAtrasados">
+            <thead><tr><th>Objeto</th><th>Aluno</th><th>Ação</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="card professor-card">
+        <h2>Empréstimo de Professores</h2>
+        <table id="tabelaProfessores">
+            <thead><tr><th>Objeto</th><th>Professor</th><th>Ação</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="modalDevolucao" class="modal">
+        <div class="modal-content">
+            <h3>Confirmar Devolução</h3>
+            <p>Quem está recebendo este item?</p>
+            <select id="monitorRecebedor" required>
+                <option value="">Carregando monitores...</option>
+            </select>
+            
+            <div class="modal-buttons">
+                <button onclick="confirmarDevolucao()" class="btn-confirmar">Confirmar Entrega</button>
+                <button onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js"></script>
+</body>
+</html>

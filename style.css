@@ -1,0 +1,333 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #046990;
+    margin: 0;
+    padding: 0px;
+    color: #333;
+    padding-top: 80px;
+    padding-bottom: 80px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+body::after {
+    content: ""; /* Necessário para pseudo-elementos */
+    position: fixed; /* Fixa na tela, não move no scroll */
+    top: 0;
+    left: 0;
+    width: 100%; /* Cobre a largura total */
+    height: 100%; /* Cobre a altura total */
+    /* 2. Layering: Coloca a imagem ATRÁS de todos os cartões e da navbar */
+    z-index: -1; 
+    /* 3. Evita interações (cliques passsam direto para o conteúdo real) */
+    pointer-events: none; 
+
+    /* 4. Carrega e configura a imagem */
+    /* Substitua pelo caminho correto da sua imagem grande */
+    background-image: url('img/icon2.png'); 
+    background-repeat: no-repeat;
+    
+    /* 5. Posiciona Grande no Lado Direito e Centralizada Verticamente */
+    background-position: -680px center; /* Pinos à direita, com margem de 20px */
+    background-size: 150vh auto; /* Grande: 80% da altura da tela, largura proporcional */
+    
+    /* 6. Transparência Baixa (Muito Sutil/Marca d'água) */
+    opacity: 0.5; /* 10% opacidade / 90% transparente. Aumente para 0.2 ou 0.3 se estiver muito sutil */
+    filter: drop-shadow(15px 15px 10px rgba(0,0,0,0.2));
+}
+
+.container {
+    max-width: 1000px;
+    margin: auto;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 50px;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    flex: 1;
+    min-width: 300px;
+}
+
+h2 {
+    margin-top: 0;
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="text"], 
+input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #7cac44;
+    color: white;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background-color: #4c8454;
+}
+
+.btn-refresh {
+    margin-top: 15px;
+    background-color: #2c3e50;
+}
+
+.btn-refresh:hover {
+    background-color: #1a252f;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+.aviso {
+    color: #27ae60;
+    font-weight: bold;
+    margin-top: 10px;
+    display: none;
+    text-align: center;
+}
+
+.navbar {
+    background-color: white; /* Azul escuro profissional */
+    color: white;
+    height: 60px;
+    width: 100%;
+    position: fixed; /* Deixa o menu sempre visível no topo */
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 1000; /* Garante que a barra fique por cima de tudo */
+}
+
+.nav-content {
+    max-width: 1000px; /* Mesma largura do seu container para alinhar */
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between; /* Título na esquerda, Logo na direita */
+    align-items: center;
+}
+
+.nav-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: #046990;
+}
+
+.nav-logo img {
+    height: 40px; /* Ajusta o tamanho da sua logo */
+    border-radius: 5px; /* Deixa as bordas da logo levemente arredondadas */
+}
+
+.modal {
+    display: none; /* Começa escondido */
+    position: fixed;
+    z-index: 1001; /* Fica por cima de tudo, até da navbar */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* Fundo escuro meio transparente */
+    align-items: center; /* Centraliza verticalmente */
+    justify-content: center; /* Centraliza horizontalmente */
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    width: 320px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    color: #2c3e50;
+}
+
+.modal-content input {
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-confirmar { background-color: #27ae60; }
+.btn-confirmar:hover { background-color: #219150; }
+
+.btn-cancelar { background-color: #e74c3c; }
+.btn-cancelar:hover { background-color: #c0392b; }
+
+#splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff; /* Cor de fundo da abertura */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Garante que fica acima de tudo */
+    transition: opacity 0.5s ease, visibility 0.5s;
+}
+
+.splash-content {
+    text-align: center;
+}
+
+.splash-logo {
+    width: 120px; /* Ajuste o tamanho da sua logo */
+    margin-bottom: 20px;
+    /* Opcional: Animação de pulso na logo */
+    animation: pulse 2s infinite;
+}
+
+/* O Loader (Círculo girando) */
+.loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db; /* Cor do carregamento */
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px;
+}
+
+/* Animações */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Classe para esconder a splash screen */
+.splash-hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+select {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 16px;
+    color: #333;
+    background-color: #fff;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    /* Remove a seta padrão do navegador */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    /* Adiciona uma seta personalizada (SVG) */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%233498db' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 18px;
+}
+
+/* Efeito ao passar o mouse */
+select:hover {
+    border-color: #3498db;
+    background-color: #f9fbff;
+}
+
+/* Efeito quando o campo está focado (clicado) */
+select:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.15);
+    background-color: #fff;
+}
+
+/* Estilo para as opções dentro da lista */
+select option {
+    padding: 10px;
+    background-color: #fff;
+    color: #333;
+}
+
+/* Pequeno ajuste para o grupo que contém o select */
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+/* Estilo opcional para quando o campo estiver desabilitado (Carregando...) */
+select:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #444;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
