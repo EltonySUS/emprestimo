@@ -7,6 +7,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="mobile.css" media="screen and (max-width: 768px)">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker registrado!'))
+                .catch(err => console.log('Erro ao registrar SW', err));
+            });
+        }
+    </script>
 </head>
 <body>
 
@@ -20,10 +36,10 @@
 
 <nav class="navbar">
     <div class="nav-content">
-         <span class="nav-title">Sistema de Empréstimo</span>
         <div class="nav-logo">
             <img src="img/icon2.png" alt="Logo">
         </div>
+         <span class="nav-title">Sistema de Empréstimo</span>
     </div>
 </nav>
 
@@ -48,6 +64,12 @@
                 <label>Nome do Usuário:</label>
                 
                 <input type="text" id="nomeUsuarioInput" placeholder="Nome do Aluno">
+                <div class="form-ra" id="containerRA" style="display: block;">
+                    <label for="raAluno">RA do Aluno:</label>
+                    <input type="text" id="raAluno" placeholder="Digite os 6 números" maxlength="6">
+                    <span id="msgAvisoBlacklist" class="alerta-atraso">⚠️ Atenção: Este usuário possui histórico de atrasos recorrentes!</span>
+                </div>
+                
                 
                 <select id="nomeUsuarioSelect" style="display: none;">
                     <option value="">Carregando professores...</option>

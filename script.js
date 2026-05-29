@@ -3,12 +3,25 @@ const SUPABASE_URL = 'https://xtbiuwsfpjblhdchzzru.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_vKi-afmqvT78rpm_DnLj-w_8zZ2Fdxq';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// --- CONTROLE DE DATAS ---
-const inEmp = document.getElementById('dataEmprestimo');
-const inPrazo = document.getElementById('prazo');
+// --- FERRAMENTAS DE DATA ---
 
-// Função para pegar a data de hoje no formato AAAA-MM-DD (Local)
-function obterDataHoje() {
+// 1. Transforma AAAA-MM-DD (input) em DD/MM/AAAA (banco/planilha)
+function formatarParaBR(dataISO) {
+    if (!dataISO) return "";
+    const partes = dataISO.split("-");
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+// 2. Transforma DD/MM/AAAA (banco) em Objeto Date (para o JS calcular atraso)
+function converterBRParaDate(dataBR) {
+    if (!dataBR) return new Date();
+    const partes = dataBR.split("/");
+    // Formato: Ano, Mês (0-11), Dia
+    return new Date(partes[2], partes[1] - 1, partes[0], 0, 0, 0);
+}
+
+// Função para pegar a data de hoje no formato ISO para restrições do input
+function obterDataHojeISO() {
     const hoje = new Date();
     const ano = hoje.getFullYear();
     const mes = String(hoje.getMonth() + 1).padStart(2, '0');
@@ -16,16 +29,17 @@ function obterDataHoje() {
     return `${ano}-${mes}-${dia}`;
 }
 
-// Inicialização das restrições de data
-const hoje = obterDataHoje();
-inEmp.min = hoje; // Impede selecionar dias anteriores a hoje no empréstimo
+// --- CONTROLE DE INPUTS ---
+const inEmp = document.getElementById('dataEmprestimo');
+const inPrazo = document.getElementById('prazo');
+const hojeISO = obterDataHojeISO();
+
+inEmp.min = hojeISO;
 
 inEmp.addEventListener('change', () => {
     if (inEmp.value) {
-        inPrazo.disabled = false; // Destrava o campo de prazo
-        inPrazo.min = inEmp.value; // O prazo não pode ser antes do empréstimo
-        
-        // Se o usuário mudar o empréstimo para uma data maior que o prazo já escolhido, limpa o prazo
+        inPrazo.disabled = false;
+        inPrazo.min = inEmp.value;
         if (inPrazo.value && inPrazo.value < inEmp.value) {
             inPrazo.value = "";
         }
@@ -45,16 +59,21 @@ document.getElementById('formEmprestimo').addEventListener('submit', async funct
     btnSubmit.disabled = true;
     
     const dados = {
-        monitor: document.getElementById('monitor').value,
-        tipo: document.getElementById('tipoUsuario').value,
-        nomeUsuario: document.getElementById('tipoUsuario').value === "Professor"
-            ? document.getElementById('nomeUsuarioSelect').value
-            : document.getElementById('nomeUsuarioInput').value,
-        objeto: document.getElementById('objeto').value,
-        dataEmprestimo: inEmp.value,
-        prazo: inPrazo.value,
-        status: 'Emprestado'
-    };
+    monitor: document.getElementById('monitor').value,
+    tipo: document.getElementById('tipoUsuario').value,
+    nomeUsuario: document.getElementById('tipoUsuario').value === "Professor"
+        ? document.getElementById('nomeUsuarioSelect').value
+        : document.getElementById('nomeUsuarioInput').value,
+    objeto: document.getElementById('objeto').value,
+    dataEmprestimo: formatarParaBR(inEmp.value),
+    prazo: formatarParaBR(inPrazo.value),
+    status: 'Emprestado',
+    
+    // Captura o RA apenas se for Aluno, senão envia vazio ou "N/A"
+    ra: document.getElementById('tipoUsuario').value === "Professor" 
+        ? "---" 
+        : document.getElementById('raAluno').value
+};
 
     const { error } = await _supabase.from('emprestimos').insert([dados]);
 
@@ -68,7 +87,7 @@ document.getElementById('formEmprestimo').addEventListener('submit', async funct
         
         setTimeout(() => {
             document.getElementById('formEmprestimo').reset();
-            inPrazo.disabled = true; // Bloqueia o prazo novamente para o próximo registro
+            inPrazo.disabled = true;
             btnSubmit.innerText = textoOriginal;
             btnSubmit.style.backgroundColor = ""; 
             btnSubmit.disabled = false;
@@ -97,27 +116,58 @@ async function carregarDados() {
     tAtrasados.innerHTML = "";
     tProfs.innerHTML = "";
 
-    const hojeData = new Date(obterDataHoje());
+    const hoje = new Date();
+    hoje.setHours(0,0,0,0);
 
-    data.forEach(item => {
-        // Ajuste para ler a data do banco sem erro de fuso horário
-        const prazoData = new Date(item.prazo + 'T00:00:00');
+    data.forEach(async (item) => {
+        
+        // CONVERTE O TEXTO DO BANCO PARA DATA PARA COMPARAR ATRASO
+        const { count } = await _supabase
+        .from('emprestimos')
+        .select('*', { count: 'exact', head: true })
+        .eq('ra', item.ra)
+        .eq('statusPrazo', 'ATRASADO');
+
+        const classeBlacklist = (count >= 3) ? 'usuario-blacklist' : '';
 
         const linha = `<tr>
             <td>${item.objeto}</td>
-            <td>${item.nomeUsuario}<br><small>Monitor: ${item.monitor}</small></td>
+            <td class="${classeBlacklist}">${item.nomeUsuario}<br><small>RA: ${item.ra || 'N/A'}</small></td>
             <td><button class="btn-ok" onclick="entregar(${item.id})">OK</button></td>
         </tr>`;
 
         if (item.tipo === "Professor") {
             tProfs.innerHTML += linha;
-        } else if (prazoData < hojeData) {
+        } else if (prazoData < hoje) {
             tAtrasados.innerHTML += linha;
         } else {
             tAlunos.innerHTML += linha;
         }
     });
 }
+
+async function verificarHistoricoAtrasos(ra) {
+    if (ra.length < 6) return; // Só checa se o RA estiver completo
+
+    const { count, error } = await _supabase
+        .from('emprestimos')
+        .select('*', { count: 'exact', head: true }) // head: true faz a consulta ser rápida, só conta
+        .eq('ra', ra)
+        .eq('statusPrazo', 'ATRASADO');
+
+    const aviso = document.getElementById('msgAvisoBlacklist');
+    
+    if (count >= 3) {
+        aviso.style.display = 'block'; // Mostra o alerta vermelho
+    } else {
+        aviso.style.display = 'none'; // Esconde se estiver limpo
+    }
+}
+
+// Evento para checar enquanto o monitor digita
+document.getElementById('raAluno').addEventListener('input', function(e) {
+    verificarHistoricoAtrasos(e.target.value);
+});
 
 // --- DEVOLUÇÃO (MODAL) ---
 let idItemDevolucao = null;
@@ -138,72 +188,84 @@ async function confirmarDevolucao() {
     const monitor = document.getElementById('monitorRecebedor').value;
     
     if (!monitor.trim()) {
-        alert("Por favor, digite o nome do monitor.");
+        alert("Por favor, selecione o monitor.");
         return;
     }
 
     const btn = document.querySelector('.btn-confirmar');
     btn.innerText = "Salvando...";
     btn.disabled = true;
-    
-    const { error } = await _supabase
-        .from('emprestimos')
-        .update({ status: 'Devolvido', monitorRecebeu: monitor })
-        .eq('id', idItemDevolucao);
 
-    if (error) {
-        alert("Erro: " + error.message);
-        btn.innerText = "Confirmar Entrega";
-        btn.disabled = false;
-    } else {
+    try {
+        const { data: item, error: errorFetch } = await _supabase
+            .from('emprestimos')
+            .select('prazo')
+            .eq('id', idItemDevolucao)
+            .single();
+
+        if (errorFetch) throw errorFetch;
+
+        const hoje = new Date();
+        const dataPrazo = converterBRParaDate(item.prazo);
+        
+        hoje.setHours(0,0,0,0);
+        dataPrazo.setHours(0,0,0,0);
+
+        // Gera a data de hoje no formato BR
+        const dia = String(hoje.getDate()).padStart(2, '0');
+        const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+        const ano = hoje.getFullYear();
+        const dataFormatadaBR = `${dia}/${mes}/${ano}`;
+
+        let infoPrazo = hoje > dataPrazo ? "ATRASADO" : "NO PRAZO";
+
+        const { error: errorUpdate } = await _supabase
+            .from('emprestimos')
+            .update({ 
+                status: 'Devolvido', 
+                monitorRecebeu: monitor,
+                statusPrazo: infoPrazo,
+                dataDevolucao: dataFormatadaBR
+            })
+            .eq('id', idItemDevolucao);
+
+        if (errorUpdate) throw errorUpdate;
+
         fecharModal();
         carregarDados();
+        
+    } catch (err) {
+        console.error("Erro no registro:", err);
+        alert("Erro ao processar devolução.");
+    } finally {
         btn.innerText = "Confirmar Entrega";
         btn.disabled = false;
     }
 }
 
+// --- CARREGAMENTO INICIAL DE MONITORES E PROFS ---
 async function carregarMonitores() {
     const { data, error } = await _supabase
         .from('monitores')
         .select('nome')
-        .eq('ativo', true) // Pega só quem não está arquivado
+        .eq('ativo', true)
         .order('nome', { ascending: true });
 
-    if (error) {
-        console.error("Erro ao buscar monitores:", error);
-        return;
-    }
+    if (error) return;
 
-    // Seleciona os dois campos (o do formulário e o do modal)
     const selectSaida = document.getElementById('monitor');
     const selectRecebimento = document.getElementById('monitorRecebedor');
-
-    // Limpa as opções atuais e adiciona a padrão
     const opPadrao = '<option value="">Selecione um monitor</option>';
+    
     selectSaida.innerHTML = opPadrao;
     selectRecebimento.innerHTML = opPadrao;
 
-    // Preenche com os nomes do banco
     data.forEach(m => {
         const option = `<option value="${m.nome}">${m.nome}</option>`;
         selectSaida.innerHTML += option;
         selectRecebimento.innerHTML += option;
     });
 }
-
-document.getElementById('tipoUsuario').addEventListener('change', function() {
-    const tipo = this.value;
-    const campoMonitor = document.getElementById('monitor');
-
-    if (tipo === "Professor") {
-        // Exemplo: Destacar o campo ou aplicar uma regra específica
-        campoMonitor.style.borderColor = "#3498db";
-        console.log("Monitor, atenção: Empréstimo para Professor detectado.");
-    } else {
-        campoMonitor.style.borderColor = "";
-    }
-});
 
 async function carregarProfessores() {
     const { data, error } = await _supabase
@@ -221,39 +283,48 @@ async function carregarProfessores() {
     });
 }
 
-// --- LÓGICA DE TROCA (ALUNO VS PROFESSOR) ---
+// --- LÓGICA DE INTERFACE ---
 document.getElementById('tipoUsuario').addEventListener('change', function() {
     const tipo = this.value;
     const inputAluno = document.getElementById('nomeUsuarioInput');
     const selectProf = document.getElementById('nomeUsuarioSelect');
+    const containerRA = document.getElementById('containerRA'); // Referência ao container do RA
+    const raInput = document.getElementById('raAluno'); // Referência ao input do RA
 
     if (tipo === "Professor") {
+        // Esconde campos de Aluno
         inputAluno.style.display = "none";
         inputAluno.required = false;
         
+        containerRA.style.display = "none"; // ESCONDE O RA
+        raInput.required = false;           // Tira a obrigatoriedade
+        raInput.value = "";                 // Limpa o campo para não enviar lixo
+
+        // Mostra campos de Professor
         selectProf.style.display = "block";
         selectProf.required = true;
     } else {
+        // Mostra campos de Aluno
         inputAluno.style.display = "block";
         inputAluno.required = true;
         
+        containerRA.style.display = "block"; // MOSTRA O RA
+        raInput.required = true;             // Torna o RA obrigatório para alunos
+
+        // Esconde campos de Professor
         selectProf.style.display = "none";
         selectProf.required = false;
     }
 });
 
-// Chame essa função quando a página carregar
 window.addEventListener('DOMContentLoaded', () => {
     carregarMonitores();
     carregarProfessores();
     carregarDados(); 
 });
 
-// pagina de inicio (Splash Screen)
 window.addEventListener('load', () => {
     const splash = document.getElementById('splash-screen');
-    
-    // Define um tempo mínimo de 2 segundos para a splash screen aparecer
     setTimeout(() => {
         splash.classList.add('splash-hidden');
     }, 2000); 

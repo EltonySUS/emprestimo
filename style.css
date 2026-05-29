@@ -1,5 +1,5 @@
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Lato', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #046990;
     margin: 0;
     padding: 0px;
@@ -203,6 +203,7 @@ th {
 .modal-buttons {
     display: flex;
     gap: 10px;
+    margin-top: 20px;
 }
 
 .btn-confirmar { background-color: #27ae60; }
@@ -315,6 +316,10 @@ select option {
     position: relative;
 }
 
+.form-ra{
+    margin-top: 20px;
+}
+
 /* Estilo opcional para quando o campo estiver desabilitado (Carregando...) */
 select:disabled {
     background-color: #f5f5f5;
@@ -330,4 +335,18 @@ label {
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.usuario-blacklist {
+    color: #e74c3c !important;
+    font-weight: bold;
+}
+
+/* Mensagem de alerta no formulário */
+.alerta-atraso {
+    color: #e74c3c;
+    font-size: 0.85em;
+    margin-top: 5px;
+    display: none; /* Escondido por padrão */
+    font-weight: bold;
 }
